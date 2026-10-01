@@ -84,7 +84,7 @@ You can also open `results.html?class=7A` to go straight to one class.
 (combine with class like this: `?class=test&group=influence`).
 
 **Editing questions.** Change `config.js` on GitHub (open the file → ✏️ pencil icon → edit → Commit changes).
-The site updates within a minute or two. Keep the `crowd` letter set to the answer the fake peers pick.
+The site updates within a minute or two. For each question set `correct` to the right answer and `crowd` to the (wrong) answer the fake peers pick. The results board warns you if one is missing or if both are the same.
 
 **Starting fresh.** Delete the result rows in the Google Sheet (keep the header row).
 
