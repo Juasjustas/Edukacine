@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quick Choice Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="wrap">
+  <section id="intro" class="card">
+    <h1>Quick Choice Quiz</h1>
+    <p>You'll get <span class="qtotal">20</span> questions. Each one has 4 answers. Tap the one you think is right.</p>
+    <p class="muted">You have <span class="secTotal">10</span> seconds per question. You can change your answer until the time runs out, or skip a question if you don't know.</p>
+    <div class="row"><button class="btn" id="startBtn" type="button">Start</button></div>
+  </section>
+
+  <section id="quiz" class="card" hidden>
+    <div class="topline">
+      <span class="label" id="qnum">Question 1 of 20</span>
+      <span class="secs" id="secs">10</span>
+    </div>
+    <div class="bar"><i id="barFill"></i></div>
+    <h2 id="qtext">Question</h2>
+    <div class="opts" id="opts"></div>
+    <div class="quizfoot">
+      <p class="hint" id="hint"></p>
+      <button class="btn ghost sm" id="skipBtn" type="button">Skip question →</button>
+    </div>
+  </section>
+
+  <section id="done" class="card" hidden>
+    <h1>All done!</h1>
+    <p class="status" id="sendStatus" aria-live="polite">Sending your answers…</p>
+    <div id="fallback" hidden>
+      <p>Show this code to your teacher instead:</p>
+      <p class="code" id="code">—</p>
+      <button class="btn ghost sm" id="retryBtn" type="button">Try sending again</button>
+    </div>
+  </section>
+</main>
+
+<script src="config.js"></script>
+<script>
+(function () {
+  const C = window.QUIZ_CONFIG;
+  const QUESTIONS = C.QUESTIONS.map(q => ({ ...q, crowdIdx: "ABCD".indexOf(String(q.crowd).toUpperCase()) }));
+  const N = QUESTIONS.length;
+  const LETTERS = ["A", "B", "C", "D"];
+  const PEER_COLORS = [1,2,3,4,5,6,7].map(n => `var(--peer-${n})`);
+  const PERSON = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4.2"/><path d="M3.5 21c.6-4.6 4.1-7.2 8.5-7.2s7.9 2.6 8.5 7.2z"/></svg>';
+  const $ = id => document.getElementById(id);
+
+  // Class label from the link, e.g. ...?class=7A
+  const params = new URLSearchParams(location.search);
+  const CLASS = (params.get("class") || "").replace(/[^\w-]/g, "").slice(0, 20);
+  // Group: random 50/50. For testing: ?group=influence or ?group=control
+  const forced = params.get("group");
+  const GROUP = forced === "influence" || forced === "control" ? forced : (Math.random() < 0.5 ? "influence" : "control");
+  const RUN_ID = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+
+  document.querySelectorAll(".qtotal").forEach(e => e.textContent = N);
+  document.querySelectorAll(".secTotal").forEach(e => e.textContent = C.SECONDS_PER_QUESTION);
+
+  let qi = 0, choice = null, answers = [], timers = [], tickTimer = null, deadline = 0;
+
+  function show(id) { ["intro", "quiz", "done"].forEach(s => $(s).hidden = s !== id); }
+  function clearTimers() { timers.forEach(clearTimeout); timers = []; clearInterval(tickTimer); }
+
+  function render() {
+    const q = QUESTIONS[qi];
+    choice = null;
+    $("qnum").textContent = `Question ${qi + 1} of ${N}`;
+    $("qtext").textContent = q.text;
+    $("hint").textContent = "";
+    const box = $("opts");
+    box.innerHTML = "";
+    q.options.forEach((t, i) => {
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "opt"; b.id = `opt${i}`;
+      b.innerHTML = `<span class="letter">${LETTERS[i]}</span><span class="otext"></span><span class="peers" aria-hidden="true"></span>`;
+      b.querySelector(".otext").textContent = t;
+      b.addEventListener("click", () => select(i));
+      box.appendChild(b);
+    });
+
+    const secs = C.SECONDS_PER_QUESTION;
+    deadline = performance.now() + secs * 1000;
+    const fill = $("barFill");
+    fill.style.transition = "none"; fill.style.transform = "scaleX(1)"; fill.classList.remove("low");
+    $("secs").classList.remove("low");
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      fill.style.transition = `transform ${secs}s linear`;
+      fill.style.transform = "scaleX(0)";
+    }));
+    tick();
+    tickTimer = setInterval(tick, 200);
+    timers.push(setTimeout(next, secs * 1000));
+
+    if (GROUP === "influence" && q.crowdIdx >= 0) schedulePeers(q.crowdIdx);
+  }
+
+  function schedulePeers(crowd) {
+    const others = [0,1,2,3].filter(i => i !== crowd);
+    const decoy = others[Math.floor(Math.random() * others.length)];
+    const seq = Array(C.PEERS_ON_CROWD).fill(crowd);
+    for (let k = 0; k < C.PEERS_ELSEWHERE; k++) seq.splice(1 + Math.floor(Math.random() * seq.length), 0, decoy);
+    const colors = [...PEER_COLORS].sort(() => Math.random() - 0.5);
+    seq.forEach((opt, n) => {
+      timers.push(setTimeout(() => {
+        const strip = document.querySelector(`#opt${opt} .peers`);
+        if (!strip) return;
+        const p = document.createElement("span");
+        p.className = "peer";
+        p.style.background = colors[n % colors.length];
+        p.innerHTML = PERSON;
+        strip.appendChild(p);
+      }, C.PEERS_START_AT * 1000 + n * C.PEER_INTERVAL_MS + Math.random() * 200));
+    });
+  }
+
+  function tick() {
+    const left = Math.max(0, Math.ceil((deadline - performance.now()) / 1000));
+    $("secs").textContent = left;
+    if (left <= 3) { $("secs").classList.add("low"); $("barFill").classList.add("low"); }
+  }
+
+  function select(i) {
+    choice = i;
+    document.querySelectorAll(".opt").forEach((b, k) => b.classList.toggle("sel", k === i));
+    $("hint").textContent = "Answer saved. You can still change it.";
+  }
+
+  function next() {
+    clearTimers();
+    answers.push(choice);
+    qi++;
+    if (qi < N) render(); else finish();
+  }
+
+  /* ---------- Sending ---------- */
+  function buildResult() {
+    let matched = 0, other = 0, skipped = 0;
+    answers.forEach((a, i) => {
+      if (a === null) skipped++;
+      else if (a === QUESTIONS[i].crowdIdx) matched++;
+      else other++;
+    });
+    return {
+      id: RUN_ID,
+      cls: CLASS,
+      team: GROUP,
+      answers: answers.map(a => a === null ? "-" : LETTERS[a]).join(""),
+      matched, other, skipped
+    };
+  }
+
+  async function send(result) {
+    if (!C.SCRIPT_URL || C.SCRIPT_URL.indexOf("script.google.com") === -1) throw new Error("not configured");
+    // text/plain + no-cors: a "simple" request Google Apps Script accepts from any site.
+    // The script ignores duplicate ids, so retrying is safe.
+    await fetch(C.SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(result)
+    });
+  }
+
+  async function sendWithRetry(result) {
+    $("sendStatus").className = "status";
+    $("sendStatus").textContent = "Sending your answers…";
+    $("fallback").hidden = true;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        await send(result);
+        $("sendStatus").className = "status ok";
+        $("sendStatus").textContent = "Your answers were sent. Thanks! You can put your device down.";
+        return;
+      } catch (err) {
+        if (err.message === "not configured") break;
+        await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
+      }
+    }
+    $("sendStatus").className = "status bad";
+    $("sendStatus").textContent = "Your answers couldn't be sent.";
+    $("code").textContent = `${result.team === "influence" ? "B" : "R"}-${String(result.matched).padStart(2, "0")}`;
+    $("fallback").hidden = false;
+  }
+
+  let lastResult = null;
+  function finish() {
+    show("done");
+    lastResult = buildResult();
+    sendWithRetry(lastResult);
+  }
+
+  $("retryBtn").addEventListener("click", () => lastResult && sendWithRetry(lastResult));
+  $("skipBtn").addEventListener("click", () => { choice = null; next(); });
+  $("startBtn").addEventListener("click", () => { show("quiz"); qi = 0; answers = []; render(); });
+})();
+</script>
+</body>
+</html>
