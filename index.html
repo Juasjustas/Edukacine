@@ -158,32 +158,45 @@
     };
   }
 
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+  // Returns true only when Google confirms the row was saved.
   async function send(result) {
     if (!C.SCRIPT_URL || C.SCRIPT_URL.indexOf("script.google.com") === -1) throw new Error("not configured");
-    // text/plain + no-cors: a "simple" request Google Apps Script accepts from any site.
-    // The script ignores duplicate ids, so retrying is safe.
-    await fetch(C.SCRIPT_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify(result)
-    });
+    const body = JSON.stringify(result);
+    try {
+      // text/plain keeps this a "simple" request, so Google answers without a CORS preflight
+      // and we can read its reply.
+      const res = await fetch(C.SCRIPT_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body });
+      const data = await res.json(); // a busy/error page from Google isn't JSON -> throws -> retry
+      return data && data.ok === true;
+    } catch (err) {
+      if (err instanceof TypeError && !navigator.onLine) return false; // offline: retry later
+      if (err instanceof SyntaxError) return false;                    // Google replied with an error page
+      // Some school networks block reading the reply. Fall back to a blind send.
+      await fetch(C.SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" }, body });
+      return true;
+    }
   }
 
-  async function sendWithRetry(result) {
+  async function sendWithRetry(result, firstTry) {
     $("sendStatus").className = "status";
     $("sendStatus").textContent = "Sending your answers…";
     $("fallback").hidden = true;
-    for (let attempt = 0; attempt < 3; attempt++) {
+    // Everyone finishes at about the same moment, so spread the first sends over ~4 seconds.
+    if (firstTry) await sleep(Math.random() * 4000);
+    // The script ignores duplicate ids, so retrying never creates double rows.
+    for (let attempt = 0; attempt < 6; attempt++) {
       try {
-        await send(result);
-        $("sendStatus").className = "status ok";
-        $("sendStatus").textContent = "Your answers were sent. Thanks! You can put your device down.";
-        return;
+        if (await send(result)) {
+          $("sendStatus").className = "status ok";
+          $("sendStatus").textContent = "Your answers were sent. Thanks! You can put your device down.";
+          return;
+        }
       } catch (err) {
         if (err.message === "not configured") break;
-        await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
       }
+      await sleep(1500 * (attempt + 1) + Math.random() * 1500);
     }
     $("sendStatus").className = "status bad";
     $("sendStatus").textContent = "Your answers couldn't be sent.";
@@ -195,10 +208,10 @@
   function finish() {
     show("done");
     lastResult = buildResult();
-    sendWithRetry(lastResult);
+    sendWithRetry(lastResult, true);
   }
 
-  $("retryBtn").addEventListener("click", () => lastResult && sendWithRetry(lastResult));
+  $("retryBtn").addEventListener("click", () => lastResult && sendWithRetry(lastResult, false));
   $("skipBtn").addEventListener("click", () => { choice = null; next(); });
   $("startBtn").addEventListener("click", () => { show("quiz"); qi = 0; answers = []; render(); });
 })();
