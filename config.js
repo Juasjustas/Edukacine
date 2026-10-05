@@ -26,8 +26,7 @@ window.QUIZ_CONFIG = {
   ],
   INTRO_INFLUENCE: [
     "Tavęs laukia 20 klausimų iš biologijos, istorijos, chemijos, fizikos ir kitų dalykų. Kiekvienas klausimas turi 4 atsakymus – pasirink tą, kuris, tavo manymu, yra teisingas.",
-    "Kiekvienam klausimui turi 10 sekundžių. Kol laikas nesibaigė, atsakymą gali pakeisti. Jei nežinai atsakymo, gali klausimą praleisti.",
-    "Šią viktoriną tuo pačiu metu sprendžia ir kiti mokiniai. Po kelių sekundžių šalia atsakymų pradės rodytis žmogeliukai – taip matysi, ką renkasi kiti.",
+    "Kiekvienam klausimui turi 10 sekundžių. Kol laikas nesibaigė, atsakymą gali pakeisti. Jei nežinai atsakymo, gali klausimą praleisti. Šalia atsakymų matysi ir kitų mokinių pasirinkimus.",
     "Klausimai pamažu sunkėja, todėl nesijaudink, jei į kai kuriuos neatsakysi. Atsakinėk savarankiškai ir nesitark su kitais."
   ],
 
@@ -39,7 +38,7 @@ window.QUIZ_CONFIG = {
                  Same as "correct" = the peers look trustworthy (not counted as peer pressure).
                  Different from "correct" = a trap question.                     */
   QUESTIONS: [
-    // Easy (peers pick the RIGHT answer on 1, 2, 3 to build trust)
+    // Easy (peers pick the RIGHT answer on 1, 2, 3 and 5 to build trust)
     { text: "Kiek kojų turi voras?",
       options: ["6", "8", "10", "4"], correct: "B", crowd: "B" },
     { text: "Kuri planeta yra arčiausiai Saulės?",
@@ -49,7 +48,7 @@ window.QUIZ_CONFIG = {
     { text: "Kiek bus 7 × 8?",
       options: ["54", "56", "64", "48"], correct: "B", crowd: "A" },
     { text: "Kokia yra vandens cheminė formulė?",
-      options: ["H₂O", "CO₂", "O₂", "H₂O₂"], correct: "A", crowd: "D" },
+      options: ["H₂O", "CO₂", "O₂", "H₂O₂"], correct: "A", crowd: "A" },
 
     // Medium (peers right again on 6 and 9)
     { text: "Kuriais metais buvo atkurta Lietuvos nepriklausomybė (Kovo 11-oji)?",
@@ -65,7 +64,7 @@ window.QUIZ_CONFIG = {
     { text: "Koks yra greičio matavimo vienetas SI sistemoje?",
       options: ["km/h", "m/s", "m/s²", "N"], correct: "B", crowd: "A" },
     { text: "Kuriais metais įvyko Žalgirio mūšis?",
-      options: ["1385", "1410", "1569", "1236"], correct: "B", crowd: "A" },
+      options: ["1412", "1410", "1569", "1236"], correct: "B", crowd: "A" },
 
     // Hard (peers right once more on 13)
     { text: "Kurį cheminį elementą žymi simbolis Fe?",
