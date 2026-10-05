@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en">
+<html lang="lt">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Quick Choice Quiz</title>
+<title>Greitoji viktorina</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&display=swap">
@@ -12,33 +12,32 @@
 <body>
 <main class="wrap">
   <section id="intro" class="card">
-    <h1>Quick Choice Quiz</h1>
-    <p>You'll get <span class="qtotal">20</span> questions. Each one has 4 answers. Tap the one you think is right.</p>
-    <p class="muted">You have <span class="secTotal">10</span> seconds per question. You can change your answer until the time runs out, or skip a question if you don't know.</p>
-    <div class="row"><button class="btn" id="startBtn" type="button">Start</button></div>
+    <h1 id="introTitle">Greitoji viktorina</h1>
+    <div id="introText" style="display:flex;flex-direction:column;gap:12px"></div>
+    <div class="row"><button class="btn" id="startBtn" type="button">Pradėti</button></div>
   </section>
 
   <section id="quiz" class="card" hidden>
     <div class="topline">
-      <span class="label" id="qnum">Question 1 of 20</span>
+      <span class="label" id="qnum">Klausimas 1 iš 20</span>
       <span class="secs" id="secs">10</span>
     </div>
     <div class="bar"><i id="barFill"></i></div>
-    <h2 id="qtext">Question</h2>
+    <h2 id="qtext">Klausimas</h2>
     <div class="opts" id="opts"></div>
     <div class="quizfoot">
       <p class="hint" id="hint"></p>
-      <button class="btn ghost sm" id="skipBtn" type="button">Skip question →</button>
+      <button class="btn ghost sm" id="skipBtn" type="button">Praleisti klausimą →</button>
     </div>
   </section>
 
   <section id="done" class="card" hidden>
-    <h1>All done!</h1>
-    <p class="status" id="sendStatus" aria-live="polite">Sending your answers…</p>
+    <h1>Viskas!</h1>
+    <p class="status" id="sendStatus" aria-live="polite">Siunčiami tavo atsakymai…</p>
     <div id="fallback" hidden>
-      <p>Show this code to your teacher instead:</p>
+      <p>Parodyk šį kodą mokytojui:</p>
       <p class="code" id="code">—</p>
-      <button class="btn ghost sm" id="retryBtn" type="button">Try sending again</button>
+      <button class="btn ghost sm" id="retryBtn" type="button">Bandyti siųsti dar kartą</button>
     </div>
   </section>
 </main>
@@ -47,7 +46,7 @@
 <script>
 (function () {
   const C = window.QUIZ_CONFIG;
-  const QUESTIONS = C.QUESTIONS.map(q => ({ ...q, crowdIdx: "ABCD".indexOf(String(q.crowd).toUpperCase()) }));
+  const QUESTIONS = C.QUESTIONS.map(q => ({ ...q, crowdIdx: "ABCD".indexOf(String(q.crowd).toUpperCase()), correctIdx: "ABCD".indexOf(String(q.correct || "").toUpperCase()) }));
   const N = QUESTIONS.length;
   const LETTERS = ["A", "B", "C", "D"];
   const PEER_COLORS = [1,2,3,4,5,6,7].map(n => `var(--peer-${n})`);
@@ -62,8 +61,11 @@
   const GROUP = forced === "influence" || forced === "control" ? forced : (Math.random() < 0.5 ? "influence" : "control");
   const RUN_ID = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 
-  document.querySelectorAll(".qtotal").forEach(e => e.textContent = N);
-  document.querySelectorAll(".secTotal").forEach(e => e.textContent = C.SECONDS_PER_QUESTION);
+  // Start screen: different instructions per group
+  $("introTitle").textContent = C.INTRO_TITLE || "Greitoji viktorina";
+  ((GROUP === "influence" ? C.INTRO_INFLUENCE : C.INTRO_CONTROL) || []).forEach(t => {
+    const p = document.createElement("p"); p.textContent = t; $("introText").appendChild(p);
+  });
 
   let qi = 0, choice = null, answers = [], timers = [], tickTimer = null, deadline = 0;
 
@@ -73,7 +75,7 @@
   function render() {
     const q = QUESTIONS[qi];
     choice = null;
-    $("qnum").textContent = `Question ${qi + 1} of ${N}`;
+    $("qnum").textContent = `Klausimas ${qi + 1} iš ${N}`;
     $("qtext").textContent = q.text;
     $("hint").textContent = "";
     const box = $("opts");
@@ -131,7 +133,7 @@
   function select(i) {
     choice = i;
     document.querySelectorAll(".opt").forEach((b, k) => b.classList.toggle("sel", k === i));
-    $("hint").textContent = "Answer saved. You can still change it.";
+    $("hint").textContent = "Atsakymas pažymėtas. Dar gali jį pakeisti.";
   }
 
   function next() {
@@ -143,10 +145,13 @@
 
   /* ---------- Sending ---------- */
   function buildResult() {
-    let matched = 0, other = 0, skipped = 0;
+    // matched = went with the crowd on a trap question (where the crowd is wrong)
+    let matched = 0, other = 0, skipped = 0, correct = 0;
     answers.forEach((a, i) => {
-      if (a === null) skipped++;
-      else if (a === QUESTIONS[i].crowdIdx) matched++;
+      const q = QUESTIONS[i];
+      if (a === null) { skipped++; return; }
+      if (a === q.correctIdx) correct++;
+      if (a === q.crowdIdx && q.crowdIdx !== q.correctIdx) matched++;
       else other++;
     });
     return {
@@ -154,7 +159,7 @@
       cls: CLASS,
       team: GROUP,
       answers: answers.map(a => a === null ? "-" : LETTERS[a]).join(""),
-      matched, other, skipped
+      matched, other, skipped, correct
     };
   }
 
@@ -181,7 +186,7 @@
 
   async function sendWithRetry(result, firstTry) {
     $("sendStatus").className = "status";
-    $("sendStatus").textContent = "Sending your answers…";
+    $("sendStatus").textContent = "Siunčiami tavo atsakymai…";
     $("fallback").hidden = true;
     // Everyone finishes at about the same moment, so spread the first sends over ~4 seconds.
     if (firstTry) await sleep(Math.random() * 4000);
@@ -190,7 +195,7 @@
       try {
         if (await send(result)) {
           $("sendStatus").className = "status ok";
-          $("sendStatus").textContent = "Your answers were sent. Thanks! You can put your device down.";
+          $("sendStatus").textContent = "Tavo atsakymai išsiųsti. Ačiū! Gali padėti įrenginį.";
           return;
         }
       } catch (err) {
@@ -199,8 +204,8 @@
       await sleep(1500 * (attempt + 1) + Math.random() * 1500);
     }
     $("sendStatus").className = "status bad";
-    $("sendStatus").textContent = "Your answers couldn't be sent.";
-    $("code").textContent = `${result.team === "influence" ? "B" : "R"}-${String(result.matched).padStart(2, "0")}`;
+    $("sendStatus").textContent = "Nepavyko išsiųsti tavo atsakymų.";
+    $("code").textContent = `${result.team === "influence" ? "B" : "R"}-${String(result.correct).padStart(2, "0")}-${String(result.matched).padStart(2, "0")}`;
     $("fallback").hidden = false;
   }
 

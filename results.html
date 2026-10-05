@@ -61,12 +61,12 @@
   <!-- 2. Going with the flow -->
   <section class="card">
     <h2>Going with the flow</h2>
-    <p class="muted">How often Team Influence picked the answer the fake classmates were picking.</p>
+    <p class="muted">How often Team Influence picked the wrong answer the fake classmates were picking. Counted only on the <b id="trapCount">–</b> trap questions; on the others the fake classmates picked the right answer so they'd seem trustworthy.</p>
     <div class="flow">
       <div class="flowmain">
         <span class="big blue" id="flowPct">–</span>
         <p>of Team Influence's answers went with the crowd</p>
-        <p class="small muted"><b id="flowCount">0</b> of <b id="flowTotal">0</b> answers · avg <b id="flowAvg">–</b> per student</p>
+        <p class="small muted"><b id="flowCount">0</b> of <b id="flowTotal">0</b> answers · avg <b id="flowAvg">–</b> of <b class="trapN">–</b> per student</p>
       </div>
       <div class="flowside">
         <p class="small"><span class="big red sm" id="basePct">–</span></p>
@@ -82,7 +82,7 @@
   <!-- 3. Per question -->
   <section class="card">
     <h2>Which questions pulled students along</h2>
-    <p class="muted">Sorted from the strongest pull to the weakest. The blue bar is how many in Team Influence went with the crowd; the red line marks how many in Team Normal picked that same answer anyway.</p>
+    <p class="muted">Trap questions only, sorted from the strongest pull to the weakest. The blue bar is how many in Team Influence went with the crowd; the red line marks how many in Team Normal picked that same answer anyway.</p>
     <div class="legend"><span><i style="background:var(--blue)"></i>Team Influence went with the crowd</span><span><i style="background:var(--red);width:4px"></i>Team Normal, same answer</span></div>
     <div class="qrank" id="qRank"></div>
   </section>
@@ -100,18 +100,21 @@
     correctLetter: String(q.correct || "").toUpperCase()
   }));
   const N = QUESTIONS.length;
+  // Trap questions: the fake classmates pick a WRONG answer. Only these count as "going with the flow".
+  const TRAPS = QUESTIONS.map((q, i) => i).filter(i => QUESTIONS[i].crowdLetter && QUESTIONS[i].crowdLetter !== QUESTIONS[i].correctLetter);
+  const T = TRAPS.length;
   const $ = id => document.getElementById(id);
   const params = new URLSearchParams(location.search);
   const DEMO = params.has("demo");
   const configured = C.SCRIPT_URL && C.SCRIPT_URL.indexOf("script.google.com") !== -1;
   document.querySelectorAll(".qtotal").forEach(e => e.textContent = N);
+  $("trapCount").textContent = T;
+  document.querySelectorAll(".trapN").forEach(e => e.textContent = T);
 
   // Warn about config mistakes so the numbers aren't silently wrong
   const missing = QUESTIONS.map((q, i) => "ABCD".includes(q.correctLetter) && q.correctLetter ? null : i + 1).filter(Boolean);
-  const same = QUESTIONS.map((q, i) => q.correctLetter && q.correctLetter === q.crowdLetter ? i + 1 : null).filter(Boolean);
   const warns = [];
   if (missing.length) warns.push(`No correct answer set in config.js for question ${missing.join(", ")}.`);
-  if (same.length) warns.push(`The crowd answer is the same as the correct answer for question ${same.join(", ")}.`);
   if (warns.length) { $("configWarn").textContent = warns.join(" "); $("configWarn").hidden = false; }
 
   let rows = [];
@@ -163,7 +166,7 @@
   function stats(list, team) {
     const t = list.filter(r => r.team === team);
     const correct = t.map(r => count(r, "correctLetter"));
-    const crowd = t.map(r => count(r, "crowdLetter"));
+    const crowd = t.map(r => TRAPS.reduce((n, i) => n + (ans(r, i) === QUESTIONS[i].crowdLetter ? 1 : 0), 0));
     const perQCrowd = QUESTIONS.map((q, i) => t.length ? t.filter(r => ans(r, i) === q.crowdLetter).length / t.length : null);
     const perQCorrect = QUESTIONS.map((q, i) => t.length ? t.filter(r => ans(r, i) === q.correctLetter).length / t.length : null);
     return { n: t.length, correct, crowd, avgCorrect: mean(correct), avgCrowd: mean(crowd), perQCrowd, perQCorrect };
@@ -207,13 +210,13 @@
 
     // 2. Flow
     const flowAnswers = b.crowd.reduce((x, y) => x + y, 0);
-    $("flowPct").textContent = pct(b.n ? flowAnswers / (b.n * N) : null);
+    $("flowPct").textContent = pct(b.n && T ? flowAnswers / (b.n * T) : null);
     $("flowCount").textContent = flowAnswers;
-    $("flowTotal").textContent = b.n * N;
+    $("flowTotal").textContent = b.n * T;
     $("flowAvg").textContent = fix(b.avgCrowd);
     const baseAnswers = r.crowd.reduce((x, y) => x + y, 0);
-    $("basePct").textContent = pct(r.n ? baseAnswers / (r.n * N) : null);
-    drawDots("flowChart", [[b.crowd, b.avgCrowd, "Influence", "var(--blue)"]], "with the crowd");
+    $("basePct").textContent = pct(r.n && T ? baseAnswers / (r.n * T) : null);
+    drawDots("flowChart", [[b.crowd, b.avgCrowd, "Influence", "var(--blue)"]], "with the crowd", T);
 
     // 3. Per question ranking
     drawRanking(b, r);
@@ -221,12 +224,14 @@
 
   const FONT = 'font-family="Nunito Sans, Segoe UI, sans-serif"';
 
-  function drawDots(target, series, unit) {
+  function drawDots(target, series, unit, max) {
+    const M = max || N;
     const W = 900, left = 120, right = 24, top = 20, rowH = 100, axisH = 34;
     const H = top + rowH * series.length + axisH;
-    const x = v => left + (v / N) * (W - left - right);
+    const x = v => left + (v / M) * (W - left - right);
     let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Students' number of answers ${unit}">`;
-    for (let v = 0; v <= N; v += (N > 10 ? 5 : 1)) {
+    const ticks = []; for (let v = 0; v <= M; v += (M > 10 ? 5 : 1)) ticks.push(v); if (ticks[ticks.length - 1] !== M) ticks.push(M);
+    for (const v of ticks) {
       s += `<line x1="${x(v)}" x2="${x(v)}" y1="${top}" y2="${top + rowH * series.length}" stroke="var(--line)"/>`;
       s += `<text x="${x(v)}" y="${top + rowH * series.length + 24}" text-anchor="middle" font-size="14" fill="var(--muted)" ${FONT}>${v}</text>`;
     }
@@ -251,7 +256,7 @@
     const box = $("qRank");
     box.innerHTML = "";
     if (!b.n) { box.innerHTML = '<p class="small muted">No Team Influence results yet. Questions will appear here as students finish.</p>'; return; }
-    const order = QUESTIONS.map((q, i) => i).sort((a, c) => (b.perQCrowd[c] ?? 0) - (b.perQCrowd[a] ?? 0));
+    const order = TRAPS.slice().sort((a, c) => (b.perQCrowd[c] ?? 0) - (b.perQCrowd[a] ?? 0));
     order.forEach(i => {
       const q = QUESTIONS[i];
       const flow = b.perQCrowd[i] ?? 0;

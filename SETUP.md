@@ -84,12 +84,15 @@ You can also open `results.html?class=7A` to go straight to one class.
 (combine with class like this: `?class=test&group=influence`).
 
 **Editing questions.** Change `config.js` on GitHub (open the file → ✏️ pencil icon → edit → Commit changes).
-The site updates within a minute or two. For each question set `correct` to the right answer and `crowd` to the (wrong) answer the fake peers pick. The results board warns you if one is missing or if both are the same.
+The site updates within a minute or two. For each question set `correct` to the right answer and `crowd` to the (wrong) answer the fake peers pick. If `crowd` is the same as `correct`, the fake peers pick the right answer on that question
+(this makes them seem trustworthy); those questions don't count towards "going with the flow".
+The start-screen instructions for each group are also in `config.js` (`INTRO_CONTROL`, `INTRO_INFLUENCE`).
 
 **Starting fresh.** Delete the result rows in the Google Sheet (keep the header row).
 
-**If a student's answers can't be sent** (e.g. Wi-Fi drops), their screen shows a code like **B-07**:
-B = Team Influence (blue), R = Team Normal (red), the number = how often they went with the crowd.
+**If a student's answers can't be sent** (e.g. Wi-Fi drops), their screen shows a code like **B-12-05**:
+B = Team Influence (blue), R = Team Normal (red), then the number of correct answers, then how often
+they went with the crowd on trap questions.
 They can also tap "Try sending again". Resending never creates duplicates.
 
 **Privacy.** No names or accounts are collected: only a random id, the class label, the team and the
