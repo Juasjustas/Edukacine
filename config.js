@@ -69,8 +69,8 @@ window.QUIZ_CONFIG = {
     // Hard (peers right once more on 13)
     { text: "Kurį cheminį elementą žymi simbolis Fe?",
       options: ["Fluorą", "Fosforą", "Geležį", "Šviną"], correct: "C", crowd: "C" },
-    { text: "Kas parašė poemą „Metai“?",
-      options: ["Maironis", "Antanas Baranauskas", "Kristijonas Donelaitis", "Vincas Kudirka"], correct: "C", crowd: "B" },
+    { text: "Kas parašė Lietuvos himną „Tautiška giesmė“?",
+      options: ["Vincas Kudirka", "Antanas Baranauskas", "Maironis", "Jonas Basanavičius"], correct: "A", crowd: "C" },
     { text: "Kas buvo pirmasis Lietuvos Respublikos prezidentas?",
       options: ["Antanas Smetona", "Aleksandras Stulginskis", "Jonas Basanavičius", "Kazys Grinius"], correct: "A", crowd: "C" },
     { text: "Kokia yra taisyklingojo šešiakampio vidaus kampų suma?",
