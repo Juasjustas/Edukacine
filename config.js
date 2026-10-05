@@ -10,10 +10,15 @@ window.QUIZ_CONFIG = {
 
   /* 2. Timing and fake peers */
   SECONDS_PER_QUESTION: 10,
-  PEERS_START_AT: 5,       // seconds into a question when the peer icons start appearing
-  PEERS_ON_CROWD: 6,       // icons that appear on the "crowd" answer
-  PEERS_ELSEWHERE: 1,      // icons on one other answer, so it looks realistic (0 = off)
-  PEER_INTERVAL_MS: 550,   // gap between icons appearing
+  // Each question gets a different random number of fake classmates, arriving at random moments.
+  PEERS_MIN: 5,            // fewest fake classmates on a question
+  PEERS_MAX: 9,            // most fake classmates on a question
+  PEERS_FIRST_MIN: 1.5,    // the first one appears somewhere between these two times (seconds)
+  PEERS_FIRST_MAX: 5,
+  PEERS_LAST_BY: 9,        // all of them have answered by this time (seconds)
+  PEERS_UNANIMOUS: 0.6,    // on questions where they pick the right answer: chance that ALL pick it
+  PEERS_MAJORITY_MIN: 0.5, // on trap questions: the share picking the wrong "crowd" answer
+  PEERS_MAJORITY_MAX: 0.85,//   is random between these (always more than half)
 
   /* 3. Start-screen instructions (one string per paragraph).
         CONTROL   = Team Normal (no peer icons)

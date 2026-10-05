@@ -87,6 +87,17 @@
     <div class="qrank" id="qRank"></div>
   </section>
 
+  <section class="card">
+    <details id="entries">
+      <summary><h2 style="display:inline">Visi įrašai</h2> <span class="small muted" id="entryCount"></span></summary>
+      <p class="small muted" style="margin-top:12px">Kiekviena eilutė – vienas baigtas bandymas, toks, koks išsaugotas Google lentelėje. Bandomuosius įrašus ištrinkite pačioje lentelėje.</p>
+      <div class="tablebox"><table class="etable">
+        <thead><tr><th>Laikas</th><th>Klasė</th><th>Grupė</th><th>Teisingi</th><th>Pasekė minią</th><th>Praleisti</th></tr></thead>
+        <tbody id="entryRows"></tbody>
+      </table></div>
+    </details>
+  </section>
+
   <p class="small muted" id="updated">Įkeliama…</p>
 </main>
 
@@ -138,7 +149,7 @@
         else if (r < 0.04 + pCrowd + pCorrect * (1 - pCrowd)) answers += q.correctLetter || "A";
         else answers += "ABCD".replace(q.crowdLetter, "").replace(q.correctLetter, "")[Math.floor(Math.random() * 2)] || "A";
       });
-      out.push({ cls: s < 13 ? "7A" : "8B", team, answers });
+      out.push({ cls: s < 13 ? "7A" : "8B", team, answers, time: new Date(Date.now() - (26 - s) * 40000).toISOString() });
     }
     return out;
   }
@@ -221,6 +232,9 @@
 
     // 3. Per question ranking
     drawRanking(b, r);
+
+    // 4. All entries, newest first
+    drawEntries(list);
   }
 
   const FONT = 'font-family="Nunito Sans, Segoe UI, sans-serif"';
@@ -251,6 +265,24 @@
       }
     });
     $(target).innerHTML = s + "</svg>";
+  }
+
+  function drawEntries(list) {
+    $("entryCount").textContent = `(${list.length})`;
+    const tb = $("entryRows");
+    tb.innerHTML = "";
+    if (!list.length) { tb.innerHTML = '<tr><td colspan="6" class="muted">Įrašų dar nėra.</td></tr>'; return; }
+    list.slice().reverse().forEach(row => {
+      const t = row.time ? new Date(row.time) : null;
+      const when = t && !isNaN(t) ? t.toLocaleString("lt-LT", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }) : "–";
+      const crowd = TRAPS.reduce((n, i) => n + (ans(row, i) === QUESTIONS[i].crowdLetter ? 1 : 0), 0);
+      const skipped = String(row.answers || "").split("").filter(c => c === "-").length;
+      const tr = document.createElement("tr");
+      const cells = [when, row.cls || "–", row.team === "influence" ? "Įtakos" : row.team === "control" ? "Įprastinė" : String(row.team || "?"),
+        `${count(row, "correctLetter")} / ${N}`, row.team === "influence" ? `${crowd} / ${T}` : `(${crowd})`, String(skipped)];
+      cells.forEach((c, k) => { const td = document.createElement("td"); td.textContent = c; if (k === 2) td.className = row.team === "influence" ? "tb" : "tr"; tr.appendChild(td); });
+      tb.appendChild(tr);
+    });
   }
 
   function drawRanking(b, r) {

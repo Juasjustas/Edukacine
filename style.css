@@ -132,3 +132,12 @@ select { font: 600 16px var(--font-body); padding: 8px 12px; border-radius: 10px
 .qpct { font-family: var(--font-display); font-weight: 800; font-size: 20px; color: var(--blue); min-width: 52px; text-align: right; font-variant-numeric: tabular-nums; }
 .qmeta { padding-left: 44px; }
 @media (prefers-reduced-motion: reduce) { .track .fill { transition: none; } }
+
+/* Results: entries table */
+details summary { cursor: pointer; list-style-position: outside; }
+.tablebox { overflow-x: auto; margin-top: 12px; }
+.etable { width: 100%; border-collapse: collapse; font-size: 15px; font-variant-numeric: tabular-nums; }
+.etable th, .etable td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.etable th { font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.etable td.tb { color: var(--blue); font-weight: 700; }
+.etable td.tr { color: var(--red); font-weight: 700; }

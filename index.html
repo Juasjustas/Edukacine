@@ -102,15 +102,37 @@
     tickTimer = setInterval(tick, 200);
     timers.push(setTimeout(next, secs * 1000));
 
-    if (GROUP === "influence" && q.crowdIdx >= 0) schedulePeers(q.crowdIdx);
+    if (GROUP === "influence" && q.crowdIdx >= 0) schedulePeers(q);
   }
 
-  function schedulePeers(crowd) {
-    const others = [0,1,2,3].filter(i => i !== crowd);
-    const decoy = others[Math.floor(Math.random() * others.length)];
-    const seq = Array(C.PEERS_ON_CROWD).fill(crowd);
-    for (let k = 0; k < C.PEERS_ELSEWHERE; k++) seq.splice(1 + Math.floor(Math.random() * seq.length), 0, decoy);
-    const colors = [...PEER_COLORS].sort(() => Math.random() - 0.5);
+  const rand = (a, b) => a + Math.random() * (b - a);
+  const randInt = (a, b) => Math.floor(rand(a, b + 1));
+  const shuffle = arr => { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; };
+
+  // Decide how many fake classmates pick each answer on this question.
+  function planVotes(q) {
+    const crowd = q.crowdIdx;
+    const trust = crowd === q.correctIdx;          // peers pick the right answer here
+    const n = randInt(C.PEERS_MIN, C.PEERS_MAX);
+    const counts = [0, 0, 0, 0];
+    if (trust && Math.random() < C.PEERS_UNANIMOUS) { counts[crowd] = n; return counts; }
+    const share = trust ? rand(0.75, 0.95) : rand(C.PEERS_MAJORITY_MIN, C.PEERS_MAJORITY_MAX);
+    const main = Math.min(n, Math.max(Math.round(n * share), Math.floor(n / 2) + 1)); // always a strict majority
+    counts[crowd] = main;
+    const rest = n - main;
+    const others = shuffle([0, 1, 2, 3].filter(i => i !== crowd));
+    const used = rest <= 1 ? 1 : (Math.random() < 0.5 ? 1 : 2); // the rest split over 1 or 2 other answers
+    for (let k = 0; k < rest; k++) counts[others[k % used]]++;
+    return counts;
+  }
+
+  function schedulePeers(q) {
+    const counts = planVotes(q);
+    const seq = shuffle(counts.flatMap((c, opt) => Array(c).fill(opt)));
+    // Random arrival times: first one between FIRST_MIN and FIRST_MAX, the rest scattered until LAST_BY.
+    const first = rand(C.PEERS_FIRST_MIN, C.PEERS_FIRST_MAX);
+    const times = [first, ...seq.slice(1).map(() => rand(first, C.PEERS_LAST_BY))].sort((a, b) => a - b);
+    const colors = shuffle([...PEER_COLORS]);
     seq.forEach((opt, n) => {
       timers.push(setTimeout(() => {
         const strip = document.querySelector(`#opt${opt} .peers`);
@@ -120,7 +142,7 @@
         p.style.background = colors[n % colors.length];
         p.innerHTML = PERSON;
         strip.appendChild(p);
-      }, C.PEERS_START_AT * 1000 + n * C.PEER_INTERVAL_MS + Math.random() * 200));
+      }, times[n] * 1000));
     });
   }
 
