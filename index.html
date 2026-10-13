@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&display=swap">
-<link rel="stylesheet" href="style.css?v=20261013c">
+<link rel="stylesheet" href="style.css?v=20261013d">
 </head>
 <body>
 <main class="wrap">
@@ -46,7 +46,7 @@
   </section>
 </main>
 
-<script src="config.js?v=20261013c"></script>
+<script src="config.js?v=20261013d"></script>
 <script>
 (function () {
   const C = window.QUIZ_CONFIG;
@@ -168,10 +168,17 @@
 
   function schedulePeers(q) {
     const counts = planVotes(q);
-    const seq = shuffle(counts.flatMap((c, opt) => Array(c).fill(opt)));
+    // Arrival order: random, but the majority answer tends to come in first so its lead shows early.
+    const lead = counts.indexOf(Math.max(...counts));
+    const bias = C.PEERS_CROWD_FIRST ?? 0;
+    const seq = counts.flatMap((c, opt) => Array(c).fill(opt))
+      .map(opt => ({ opt, key: Math.random() + (opt === lead ? -bias : 0) }))
+      .sort((a, b) => a.key - b.key).map(x => x.opt);
     // Random arrival times: first one between FIRST_MIN and FIRST_MAX, the rest scattered until LAST_BY.
     const first = rand(C.PEERS_FIRST_MIN, C.PEERS_FIRST_MAX);
-    const times = [first, ...seq.slice(1).map(() => rand(first, C.PEERS_LAST_BY))].sort((a, b) => a - b);
+    // Front-loaded: most arrive soon after the first one, a few stragglers later.
+    const k = C.PEERS_FRONT_LOAD ?? 1;
+    const times = [first, ...seq.slice(1).map(() => first + (C.PEERS_LAST_BY - first) * Math.pow(Math.random(), k))].sort((a, b) => a - b);
     // fake classmates wear the caps the student didn't pick, never two the same on one question
     const colors = shuffle(HATS.map((_, i) => i).filter(i => i !== myHat));
     seq.forEach((opt, n) => {

@@ -13,9 +13,11 @@ window.QUIZ_CONFIG = {
   // Each question gets a different random number of fake classmates, arriving at random moments.
   PEERS_MIN: 5,            // fewest fake classmates on a question
   PEERS_MAX: 9,            // most fake classmates on a question
-  PEERS_FIRST_MIN: 1.2,    // the first one appears somewhere between these two times (seconds)
-  PEERS_FIRST_MAX: 4,
-  PEERS_LAST_BY: 7.2,      // all of them have answered by this time (seconds); keep below SECONDS_PER_QUESTION
+  PEERS_FIRST_MIN: 0.4,    // the first one appears somewhere between these two times (seconds)
+  PEERS_FIRST_MAX: 1.5,
+  PEERS_LAST_BY: 5.5,      // all of them have answered by this time (seconds); keep below SECONDS_PER_QUESTION
+  PEERS_FRONT_LOAD: 1.6,   // >1 = most arrive early, with a few stragglers later (1 = evenly spread)
+  PEERS_CROWD_FIRST: 0.6,  // >0 = the majority answer tends to arrive first, so the trend shows early
   PEERS_UNANIMOUS: 0.6,    // on questions where they pick the right answer: chance that ALL pick it
   PEERS_MAJORITY_MIN: 0.5, // on trap questions: the share picking the wrong "crowd" answer
   PEERS_MAJORITY_MAX: 0.85,//   is random between these (always more than half)
