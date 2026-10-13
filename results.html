@@ -12,7 +12,6 @@
 <body>
 <main class="wrap wide">
 
-  <!-- 1. Correct answers -->
   <section class="card">
     <div class="row between">
       <h1>Klasės rezultatai</h1>
@@ -21,78 +20,38 @@
         <select id="classSel"><option value="">Visos klasės</option></select>
       </div>
     </div>
-    <p class="notice small" id="setupNotice" hidden>
-      Rezultatų lenta dar neprijungta. Įklijuokite Google web app nuorodą į <b>config.js</b> (žr. SETUP.md, 2 žingsnį).
-      Norėdami pamatyti lentą su išgalvotais duomenimis, adreso gale pridėkite <b>?demo</b>.
-    </p>
-    <p class="notice small" id="demoNotice" hidden>Demonstracinis režimas: tai išgalvoti rezultatai, ne tikri mokiniai.</p>
+    <p class="notice small" id="setupNotice" hidden>Rezultatų lenta neprijungta: įklijuokite Google nuorodą į <b>config.js</b>. Peržiūrai su išgalvotais duomenimis adreso gale pridėkite <b>?demo</b>.</p>
+    <p class="notice small" id="demoNotice" hidden>Demonstracinis režimas: išgalvoti duomenys.</p>
     <p class="notice small" id="configWarn" hidden></p>
 
     <h2>Teisingi atsakymai</h2>
     <div class="teams">
       <div class="team b">
         <h3>Įtakos grupė</h3>
-        <p class="small muted">Matė, ką neva renkasi kiti mokiniai</p>
-        <span class="big" id="bCorrectPct">–</span>
-        <p class="small">atsakymų buvo teisingi</p>
-        <div class="stats small">
-          <span><b id="bN">0</b> mok.</span>
-          <span>vidutiniškai <b id="bCorrectAvg">–</b> iš <span class="qtotal">20</span></span>
-        </div>
+        <span class="big" id="bPct">–</span>
+        <p class="small muted"><b id="bN">0</b> mok.</p>
       </div>
-      <div class="team r">
+      <div class="team o">
         <h3>Įprastinė grupė</h3>
-        <p class="small muted">Atsakinėjo savarankiškai</p>
-        <span class="big" id="rCorrectPct">–</span>
-        <p class="small">atsakymų buvo teisingi</p>
-        <div class="stats small">
-          <span><b id="rN">0</b> mok.</span>
-          <span>vidutiniškai <b id="rCorrectAvg">–</b> iš <span class="qtotal">20</span></span>
-        </div>
+        <span class="big" id="oPct">–</span>
+        <p class="small muted"><b id="oN">0</b> mok.</p>
       </div>
-    </div>
-    <p class="verdict" id="verdict"></p>
-    <div>
-      <p class="small muted">Kiekvienas taškas – vienas mokinys ir jo teisingų atsakymų skaičius. Stora linija – grupės vidurkis.</p>
-      <div class="chartbox" id="correctChart"></div>
     </div>
   </section>
 
-  <!-- 2. Going with the flow -->
   <section class="card">
-    <h2>Ar pasekė minią?</h2>
-    <p class="muted">Kaip dažnai įtakos grupė rinkosi tą klaidingą atsakymą, kurį rinkosi netikri „klasiokai“. Skaičiuojami tik <b id="trapCount">–</b> klausimai-spąstai; kituose netikri klasiokai rinkosi teisingą atsakymą, kad atrodytų patikimi.</p>
-    <div class="flow">
-      <div class="flowmain">
-        <span class="big blue" id="flowPct">–</span>
-        <p>įtakos grupės atsakymų sutapo su minios pasirinkimu</p>
-        <p class="small muted"><b id="flowCount">0</b> iš <b id="flowTotal">0</b> atsakymų · vidutiniškai <b id="flowAvg">–</b> iš <b class="trapN">–</b> vienam mokiniui</p>
-      </div>
-      <div class="flowside">
-        <p class="small"><span class="big red sm" id="basePct">–</span></p>
-        <p class="small muted">Tiek įprastinės grupės atsakymų sutapo su „minios“ atsakymais, nors jos niekas neveikė. Tai atskaitos taškas: skirtumas tarp šių skaičių ir yra netikrų klasiokų įtaka.</p>
-      </div>
+    <div class="row between">
+      <h2>Klausimai</h2>
+      <div class="legend"><span><i style="background:var(--blue)"></i>Įtakos grupė</span><span><i style="background:var(--orange)"></i>Įprastinė grupė</span></div>
     </div>
-    <div>
-      <p class="small muted">Kiekvienas taškas – vienas įtakos grupės mokinys: kiek kartų jis pasekė minią.</p>
-      <div class="chartbox" id="flowChart"></div>
-    </div>
-  </section>
-
-  <!-- 3. Per question -->
-  <section class="card">
-    <h2>Kurie klausimai labiausiai patraukė paskui minią</h2>
-    <p class="muted">Tik klausimai-spąstai, nuo stipriausios įtakos iki silpniausios. Mėlyna juosta – kiek įtakos grupės mokinių pasekė minią; raudona žymė – kiek įprastinės grupės mokinių tą patį atsakymą pasirinko patys.</p>
-    <div class="legend"><span><i style="background:var(--blue)"></i>Įtakos grupė pasekė minią</span><span><i style="background:var(--red);width:4px"></i>Įprastinė grupė, tas pats atsakymas</span></div>
-    <div class="qrank" id="qRank"></div>
+    <div class="qlist" id="qList"></div>
   </section>
 
   <section class="card">
     <details id="entries">
       <summary><h2 style="display:inline">Visi įrašai</h2> <span class="small muted" id="entryCount"></span></summary>
-      <p class="small muted" style="margin-top:12px">Kiekviena eilutė – vienas baigtas bandymas, toks, koks išsaugotas Google lentelėje. Bandomuosius įrašus ištrinkite pačioje lentelėje.</p>
       <div class="tablebox"><table class="etable">
-        <thead><tr><th>Laikas</th><th>Klasė</th><th>Grupė</th><th>Teisingi</th><th>Pasekė minią</th><th>Praleisti</th></tr></thead>
+        <thead><tr><th>Laikas</th><th>Klasė</th><th>Grupė</th><th>Teisingi</th><th>Praleisti</th></tr></thead>
         <tbody id="entryRows"></tbody>
       </table></div>
     </details>
@@ -105,28 +64,20 @@
 <script>
 (function () {
   const C = window.QUIZ_CONFIG;
+  const LETTERS = "ABCD";
   const QUESTIONS = C.QUESTIONS.map(q => ({
     ...q,
     crowdLetter: String(q.crowd || "").toUpperCase(),
     correctLetter: String(q.correct || "").toUpperCase()
   }));
   const N = QUESTIONS.length;
-  // Trap questions: the fake classmates pick a WRONG answer. Only these count as "going with the flow".
-  const TRAPS = QUESTIONS.map((q, i) => i).filter(i => QUESTIONS[i].crowdLetter && QUESTIONS[i].crowdLetter !== QUESTIONS[i].correctLetter);
-  const T = TRAPS.length;
   const $ = id => document.getElementById(id);
   const params = new URLSearchParams(location.search);
   const DEMO = params.has("demo");
   const configured = C.SCRIPT_URL && C.SCRIPT_URL.indexOf("script.google.com") !== -1;
-  document.querySelectorAll(".qtotal").forEach(e => e.textContent = N);
-  $("trapCount").textContent = T;
-  document.querySelectorAll(".trapN").forEach(e => e.textContent = T);
 
-  // Warn about config mistakes so the numbers aren't silently wrong
-  const missing = QUESTIONS.map((q, i) => "ABCD".includes(q.correctLetter) && q.correctLetter ? null : i + 1).filter(Boolean);
-  const warns = [];
-  if (missing.length) warns.push(`config.js faile nenurodytas teisingas atsakymas klausimui: ${missing.join(", ")}.`);
-  if (warns.length) { $("configWarn").textContent = warns.join(" "); $("configWarn").hidden = false; }
+  const missing = QUESTIONS.map((q, i) => LETTERS.includes(q.correctLetter) && q.correctLetter ? null : i + 1).filter(Boolean);
+  if (missing.length) { $("configWarn").textContent = `config.js faile nenurodytas teisingas atsakymas klausimui: ${missing.join(", ")}.`; $("configWarn").hidden = false; }
 
   let rows = [];
   let selected = (params.get("class") || "").replace(/[^\w-]/g, "");
@@ -135,19 +86,19 @@
   /* ---------- Data ---------- */
   function demoRows() {
     const out = [];
-    // Make later questions "harder" so the demo shows a spread
     for (let s = 0; s < 26; s++) {
       const team = s % 2 ? "influence" : "control";
       let answers = "";
       QUESTIONS.forEach((q, i) => {
         const hard = i / (N - 1);
+        const trust = q.crowdLetter === q.correctLetter;
+        const pCrowd = trust ? 0 : (team === "influence" ? 0.1 + hard * 0.45 : 0.08 + hard * 0.12);
         const pCorrect = 0.85 - hard * 0.55;
-        const pCrowd = team === "influence" ? 0.1 + hard * 0.45 : 0.08 + hard * 0.12;
         const r = Math.random();
         if (r < 0.04) answers += "-";
         else if (r < 0.04 + pCrowd) answers += q.crowdLetter;
-        else if (r < 0.04 + pCrowd + pCorrect * (1 - pCrowd)) answers += q.correctLetter || "A";
-        else answers += "ABCD".replace(q.crowdLetter, "").replace(q.correctLetter, "")[Math.floor(Math.random() * 2)] || "A";
+        else if (Math.random() < pCorrect) answers += q.correctLetter;
+        else answers += LETTERS.replace(q.correctLetter, "")[Math.floor(Math.random() * 3)];
       });
       out.push({ cls: s < 13 ? "7A" : "8B", team, answers, time: new Date(Date.now() - (26 - s) * 40000).toISOString() });
     }
@@ -171,25 +122,13 @@
 
   /* ---------- Numbers ---------- */
   const ans = (row, i) => String(row.answers || "")[i];
-  const count = (row, key) => QUESTIONS.reduce((n, q, i) => n + (q[key] && ans(row, i) === q[key] ? 1 : 0), 0);
-  const mean = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
-
-  function stats(list, team) {
-    const t = list.filter(r => r.team === team);
-    const correct = t.map(r => count(r, "correctLetter"));
-    const crowd = t.map(r => TRAPS.reduce((n, i) => n + (ans(r, i) === QUESTIONS[i].crowdLetter ? 1 : 0), 0));
-    const perQCrowd = QUESTIONS.map((q, i) => t.length ? t.filter(r => ans(r, i) === q.crowdLetter).length / t.length : null);
-    const perQCorrect = QUESTIONS.map((q, i) => t.length ? t.filter(r => ans(r, i) === q.correctLetter).length / t.length : null);
-    return { n: t.length, correct, crowd, avgCorrect: mean(correct), avgCrowd: mean(crowd), perQCrowd, perQCorrect };
-  }
+  const correctCount = row => QUESTIONS.reduce((n, q, i) => n + (ans(row, i) === q.correctLetter ? 1 : 0), 0);
+  const pct = v => v === null ? "–" : Math.round(v * 100) + "%";
+  // share of a group that picked a given letter on question i
+  const share = (list, i, letter) => list.length ? list.filter(r => ans(r, i) === letter).length / list.length : null;
 
   /* ---------- Render ---------- */
-  const pct = v => v === null ? "–" : Math.round(v * 100) + "%";
-  const dec = v => v.toFixed(1).replace(".", ",");
-  const fix = v => v === null ? "–" : dec(v);
-
   function draw() {
-    // class dropdown
     const classes = [...new Set(rows.map(r => r.cls).filter(Boolean))].sort();
     const sel = $("classSel");
     const want = ["", ...classes];
@@ -202,109 +141,67 @@
     $("demoNotice").hidden = !DEMO;
 
     const list = selected ? rows.filter(r => r.cls === selected) : rows;
-    const b = stats(list, "influence"), r = stats(list, "control");
+    const B = list.filter(r => r.team === "influence");
+    const O = list.filter(r => r.team === "control");
+    const groupPct = g => g.length ? g.reduce((n, r) => n + correctCount(r), 0) / (g.length * N) : null;
+    $("bPct").textContent = pct(groupPct(B));
+    $("oPct").textContent = pct(groupPct(O));
+    $("bN").textContent = B.length;
+    $("oN").textContent = O.length;
 
-    // 1. Correct
-    $("bCorrectPct").textContent = pct(b.avgCorrect === null ? null : b.avgCorrect / N);
-    $("rCorrectPct").textContent = pct(r.avgCorrect === null ? null : r.avgCorrect / N);
-    $("bCorrectAvg").textContent = fix(b.avgCorrect);
-    $("rCorrectAvg").textContent = fix(r.avgCorrect);
-    $("bN").textContent = b.n; $("rN").textContent = r.n;
-    let v = "";
-    if (b.avgCorrect !== null && r.avgCorrect !== null) {
-      const d = r.avgCorrect - b.avgCorrect;
-      if (Math.abs(d) < 0.05) v = "Abi grupės atsakė teisingai į maždaug tiek pat klausimų.";
-      else if (d > 0) v = `Įtakos grupės mokiniai vidutiniškai atsakė teisingai į ${dec(d)} klausimo mažiau nei įprastinės grupės.`;
-      else v = `Įtakos grupės mokiniai vidutiniškai atsakė teisingai į ${dec(-d)} klausimo daugiau nei įprastinės grupės.`;
-    }
-    $("verdict").textContent = v;
-    drawDots("correctChart", [[b.correct, b.avgCorrect, "Įtaka", "var(--blue)"], [r.correct, r.avgCorrect, "Įprastinė", "var(--red)"]], "correct");
-
-    // 2. Flow
-    const flowAnswers = b.crowd.reduce((x, y) => x + y, 0);
-    $("flowPct").textContent = pct(b.n && T ? flowAnswers / (b.n * T) : null);
-    $("flowCount").textContent = flowAnswers;
-    $("flowTotal").textContent = b.n * T;
-    $("flowAvg").textContent = fix(b.avgCrowd);
-    const baseAnswers = r.crowd.reduce((x, y) => x + y, 0);
-    $("basePct").textContent = pct(r.n && T ? baseAnswers / (r.n * T) : null);
-    drawDots("flowChart", [[b.crowd, b.avgCrowd, "Įtaka", "var(--blue)"]], "with the crowd", T);
-
-    // 3. Per question ranking
-    drawRanking(b, r);
-
-    // 4. All entries, newest first
+    drawQuestions(B, O);
     drawEntries(list);
   }
 
-  const FONT = 'font-family="Nunito Sans, Segoe UI, sans-serif"';
+  function optionRow(kind, label, letter, text, b, o) {
+    const row = document.createElement("div");
+    row.className = "orow " + kind;
+    row.innerHTML = `
+      <div class="olabel"><span class="otag">${label}</span><span class="oletter">${letter}</span><span class="otext"></span></div>
+      <div class="obars">
+        <div class="obar b"><div class="otrack"><i style="width:${(b ?? 0) * 100}%"></i></div><span>${pct(b)}</span></div>
+        <div class="obar o"><div class="otrack"><i style="width:${(o ?? 0) * 100}%"></i></div><span>${pct(o)}</span></div>
+      </div>`;
+    row.querySelector(".otext").textContent = text;
+    return row;
+  }
 
-  function drawDots(target, series, unit, max) {
-    const M = max || N;
-    const W = 900, left = 120, right = 24, top = 20, rowH = 100, axisH = 34;
-    const H = top + rowH * series.length + axisH;
-    const x = v => left + (v / M) * (W - left - right);
-    let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Students' number of answers ${unit}">`;
-    const ticks = []; for (let v = 0; v <= M; v += (M > 10 ? 5 : 1)) ticks.push(v); if (ticks[ticks.length - 1] !== M) ticks.push(M);
-    for (const v of ticks) {
-      s += `<line x1="${x(v)}" x2="${x(v)}" y1="${top}" y2="${top + rowH * series.length}" stroke="var(--line)"/>`;
-      s += `<text x="${x(v)}" y="${top + rowH * series.length + 24}" text-anchor="middle" font-size="14" fill="var(--muted)" ${FONT}>${v}</text>`;
-    }
-    series.forEach(([scores, avg, name, col], i) => {
-      const cy = top + rowH * i + rowH / 2;
-      s += `<text x="0" y="${cy + 6}" font-size="18" font-weight="800" fill="${col}" font-family="Bricolage Grotesque, sans-serif">${name}</text>`;
-      const seen = {};
-      scores.forEach(v => {
-        const k = seen[v] = (seen[v] || 0) + 1;
-        const off = (k % 2 ? 1 : -1) * Math.floor(k / 2) * 12;
-        s += `<circle cx="${x(v)}" cy="${cy + off}" r="7" fill="${col}" fill-opacity="0.5" stroke="${col}" stroke-width="1.5"/>`;
-      });
-      if (avg !== null) {
-        s += `<line x1="${x(avg)}" x2="${x(avg)}" y1="${cy - 30}" y2="${cy + 30}" stroke="${col}" stroke-width="4" stroke-linecap="round"/>`;
-        s += `<text x="${x(avg)}" y="${cy + 46}" text-anchor="middle" font-size="14" font-weight="700" fill="${col}" ${FONT}>vid. ${dec(avg)}</text>`;
+  function drawQuestions(B, O) {
+    const box = $("qList");
+    box.innerHTML = "";
+    QUESTIONS.forEach((q, i) => {
+      const item = document.createElement("div");
+      item.className = "qitem";
+      const head = document.createElement("div");
+      head.className = "qhead";
+      head.innerHTML = `<span class="qno">${i + 1}.</span><span class="qtitle"></span>`;
+      head.querySelector(".qtitle").textContent = q.text;
+      item.appendChild(head);
+      const ci = LETTERS.indexOf(q.correctLetter), ki = LETTERS.indexOf(q.crowdLetter);
+      if (ci === ki) {
+        item.appendChild(optionRow("correct", "Teisingas · minios", q.correctLetter, q.options[ci] ?? "", share(B, i, q.correctLetter), share(O, i, q.correctLetter)));
+      } else {
+        item.appendChild(optionRow("correct", "Teisingas", q.correctLetter, q.options[ci] ?? "", share(B, i, q.correctLetter), share(O, i, q.correctLetter)));
+        if (ki >= 0) item.appendChild(optionRow("crowd", "Minios", q.crowdLetter, q.options[ki] ?? "", share(B, i, q.crowdLetter), share(O, i, q.crowdLetter)));
       }
+      box.appendChild(item);
     });
-    $(target).innerHTML = s + "</svg>";
   }
 
   function drawEntries(list) {
     $("entryCount").textContent = `(${list.length})`;
     const tb = $("entryRows");
     tb.innerHTML = "";
-    if (!list.length) { tb.innerHTML = '<tr><td colspan="6" class="muted">Įrašų dar nėra.</td></tr>'; return; }
+    if (!list.length) { tb.innerHTML = '<tr><td colspan="5" class="muted">Įrašų dar nėra.</td></tr>'; return; }
     list.slice().reverse().forEach(row => {
       const t = row.time ? new Date(row.time) : null;
       const when = t && !isNaN(t) ? t.toLocaleString("lt-LT", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }) : "–";
-      const crowd = TRAPS.reduce((n, i) => n + (ans(row, i) === QUESTIONS[i].crowdLetter ? 1 : 0), 0);
       const skipped = String(row.answers || "").split("").filter(c => c === "-").length;
       const tr = document.createElement("tr");
       const cells = [when, row.cls || "–", row.team === "influence" ? "Įtakos" : row.team === "control" ? "Įprastinė" : String(row.team || "?"),
-        `${count(row, "correctLetter")} / ${N}`, row.team === "influence" ? `${crowd} / ${T}` : `(${crowd})`, String(skipped)];
-      cells.forEach((c, k) => { const td = document.createElement("td"); td.textContent = c; if (k === 2) td.className = row.team === "influence" ? "tb" : "tr"; tr.appendChild(td); });
+        `${correctCount(row)} / ${N}`, String(skipped)];
+      cells.forEach((c, k) => { const td = document.createElement("td"); td.textContent = c; if (k === 2) td.className = row.team === "influence" ? "tb" : "to"; tr.appendChild(td); });
       tb.appendChild(tr);
-    });
-  }
-
-  function drawRanking(b, r) {
-    const box = $("qRank");
-    box.innerHTML = "";
-    if (!b.n) { box.innerHTML = '<p class="small muted">Įtakos grupės rezultatų dar nėra. Klausimai atsiras čia, kai mokiniai baigs viktoriną.</p>'; return; }
-    const order = TRAPS.slice().sort((a, c) => (b.perQCrowd[c] ?? 0) - (b.perQCrowd[a] ?? 0));
-    order.forEach(i => {
-      const q = QUESTIONS[i];
-      const flow = b.perQCrowd[i] ?? 0;
-      const base = r.perQCrowd[i];
-      const row = document.createElement("div");
-      row.className = "qrow";
-      row.innerHTML = `
-        <div class="qhead"><span class="qno">${i + 1}.</span><span class="qtitle"></span></div>
-        <div class="qbar">
-          <div class="track"><i class="fill" style="width:${flow * 100}%"></i>${base === null ? "" : `<b class="base" style="left:${base * 100}%" title="Įprastinė grupė: ${Math.round(base * 100)}%"></b>`}</div>
-          <span class="qpct">${Math.round(flow * 100)}%</span>
-        </div>
-        <p class="qmeta small muted">Teisingai atsakė: įtakos gr. ${pct(b.perQCorrect[i])} · įprastinė gr. ${pct(r.perQCorrect[i])}${base === null ? "" : ` · įprastinė gr. pati pasirinko minios atsakymą ${pct(base)}`}</p>`;
-      row.querySelector(".qtitle").textContent = q.text;
-      box.appendChild(row);
     });
   }
 
