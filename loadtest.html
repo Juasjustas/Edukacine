@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="lt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apkrovos testas</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.lt-table { width: 100%; border-collapse: collapse; font-size: 15px; font-variant-numeric: tabular-nums; }
+.lt-table th, .lt-table td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.lt-table th { font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.st-wait { color: var(--muted); } .st-ok { color: var(--ok); font-weight: 700; } .st-bad { color: var(--red); font-weight: 700; } .st-blind { color: var(--warn); font-weight: 700; }
+.summary { font-family: var(--font-display); font-size: 22px; font-weight: 800; }
+label { display: flex; gap: 8px; align-items: center; }
+</style>
+</head>
+<body>
+<main class="wrap wide">
+  <section class="card">
+    <h1>Apkrovos testas</h1>
+    <p>Šis puslapis vienu metu išsiunčia <b>20 mokinių</b> rezultatų į Google lentelę, lyg visa klasė baigtų viktoriną tą pačią akimirką. Rezultatai sugeneruoti tikra viktorina; klasė pažymėta <b>TEST</b>.</p>
+    <p class="small muted">Siuntimo būdas toks pat kaip viktorinoje: kiekvienas „mokinys“ laukia atsitiktinai iki 4 s, siunčia, laukia Google patvirtinimo ir, jei reikia, bando iš naujo. Paleidus dar kartą, dublikatų nebus.</p>
+    <label class="small"><input type="checkbox" id="burst"> Griežtesnis testas: visi 20 siunčia tą pačią sekundę (be išsklaidymo)</label>
+    <div class="row"><button class="btn" id="go" type="button">Siųsti 20 rezultatų</button></div>
+    <p class="summary" id="summary" aria-live="polite"></p>
+    <p class="small" id="verify"></p>
+    <div class="chartbox"><table class="lt-table">
+      <thead><tr><th>#</th><th>Grupė</th><th>Būsena</th><th>Bandymai</th><th>Laikas</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table></div>
+  </section>
+</main>
+<script src="config.js"></script>
+<script>
+(function () {
+  const C = window.QUIZ_CONFIG;
+  const STUDENTS = [{"id": "mv6ke7j1h4e89g", "cls": "TEST", "team": "influence", "answers": "-C-BABCBD-BBCAAAAABD", "matched": 3, "other": 14, "skipped": 3, "correct": 12}, {"id": "mv6ke75suejbae", "cls": "TEST", "team": "control", "answers": "BCDBAACDBCBDAACB--CC", "matched": 1, "other": 17, "skipped": 2, "correct": 11}, {"id": "mv6ke7mbspxsqz", "cls": "TEST", "team": "influence", "answers": "BCD-ABCDCAAACCAA--BC", "matched": 6, "other": 11, "skipped": 3, "correct": 10}, {"id": "mv6ke71ndeeihe", "cls": "TEST", "team": "control", "answers": "-CDBADBBBBBBDADD-ABB", "matched": 2, "other": 16, "skipped": 2, "correct": 8}, {"id": "mv6ke7m6blwtts", "cls": "TEST", "team": "influence", "answers": "BCDBABABCABA-A-ABABC", "matched": 7, "other": 11, "skipped": 2, "correct": 11}, {"id": "mv6ke6xsu28w3m", "cls": "TEST", "team": "influence", "answers": "BCDD-BACCBABBCAAABBA", "matched": 6, "other": 13, "skipped": 1, "correct": 9}, {"id": "mv6ke7piqrbkp9", "cls": "TEST", "team": "influence", "answers": "BCDBABADCAAACDC-ADAA", "matched": 6, "other": 13, "skipped": 1, "correct": 10}, {"id": "mv6ke6y13m4eu9", "cls": "TEST", "team": "influence", "answers": "DC-BABABCAABDCCBBABA", "matched": 9, "other": 10, "skipped": 1, "correct": 8}, {"id": "mv6ke6xqfbnk94", "cls": "TEST", "team": "control", "answers": "DCDAABCBCCDDAD-CBCBB", "matched": 3, "other": 16, "skipped": 1, "correct": 8}, {"id": "mv6ke7q5exhg4d", "cls": "TEST", "team": "control", "answers": "B-DBABCBBBBACCABCCAC", "matched": 2, "other": 17, "skipped": 1, "correct": 13}, {"id": "mv6ke6xnsmm11x", "cls": "TEST", "team": "influence", "answers": "BCDBAACACAAACCD-AADA", "matched": 7, "other": 12, "skipped": 1, "correct": 9}, {"id": "mv6ke7iv7rcmt5", "cls": "TEST", "team": "control", "answers": "BCDBABDBCCBCB-ABCCCC", "matched": 0, "other": 19, "skipped": 1, "correct": 13}, {"id": "mv6ke6ysvurgfi", "cls": "TEST", "team": "influence", "answers": "BCDBACCBCAABDAACADAA", "matched": 3, "other": 17, "skipped": 0, "correct": 13}, {"id": "mv6ke6xmm1igkc", "cls": "TEST", "team": "influence", "answers": "BCDBABAACCAAACBBDAAD", "matched": 6, "other": 14, "skipped": 0, "correct": 10}, {"id": "mv6ke6xu3k5bv6", "cls": "TEST", "team": "control", "answers": "BCDBADCBAABADDDCADBD", "matched": 3, "other": 17, "skipped": 0, "correct": 9}, {"id": "mv6ke7oulrf6vb", "cls": "TEST", "team": "control", "answers": "BCABADCBBCCBCAAAABBD", "matched": 2, "other": 18, "skipped": 0, "correct": 13}, {"id": "mv6ke7jfph255m", "cls": "TEST", "team": "influence", "answers": "BADAADCBCCBCCAAADBBA", "matched": 4, "other": 16, "skipped": 0, "correct": 12}, {"id": "mv6ke7oh0lffq0", "cls": "TEST", "team": "control", "answers": "BCDBACCBDABBDABBABDD", "matched": 1, "other": 19, "skipped": 0, "correct": 13}, {"id": "mv6ke7o1jsyu8d", "cls": "TEST", "team": "influence", "answers": "BCDBABCBCCABCABDBADC", "matched": 3, "other": 17, "skipped": 0, "correct": 14}, {"id": "mv6ke7mvhmmuae", "cls": "TEST", "team": "influence", "answers": "BCDAABAACAABCCBAAABA", "matched": 10, "other": 10, "skipped": 0, "correct": 9}];
+  const $ = id => document.getElementById(id);
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+  // Same logic as the quiz (index.html), plus a note when the blind fallback was used.
+  async function send(result) {
+    const body = JSON.stringify(result);
+    try {
+      const res = await fetch(C.SCRIPT_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body });
+      const data = await res.json();
+      return data && data.ok === true ? "ok" : false;
+    } catch (err) {
+      if (err instanceof TypeError && !navigator.onLine) return false;
+      if (err instanceof SyntaxError) return false;
+      await fetch(C.SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" }, body });
+      return "blind";
+    }
+  }
+
+  function row(i) { return $("rows").children[i]; }
+  function setRow(i, cls, text, attempts, ms) {
+    const r = row(i).children;
+    r[2].className = cls; r[2].textContent = text;
+    if (attempts !== undefined) r[3].textContent = attempts;
+    if (ms !== undefined) r[4].textContent = (ms / 1000).toFixed(1).replace(".", ",") + " s";
+  }
+
+  STUDENTS.forEach((s, i) => {
+    const tr = document.createElement("tr");
+    [String(i + 1), s.team === "influence" ? "Įtakos" : "Įprastinė", "laukia", "–", "–"].forEach((t, k) => {
+      const td = document.createElement("td"); td.textContent = t; if (k === 2) td.className = "st-wait"; tr.appendChild(td);
+    });
+    $("rows").appendChild(tr);
+  });
+
+  async function runOne(s, i, burst, t0) {
+    if (!burst) await sleep(Math.random() * 4000);
+    setRow(i, "st-wait", "siunčiama…");
+    for (let attempt = 1; attempt <= 6; attempt++) {
+      let r = false;
+      try { r = await send(s); } catch (e) { r = false; }
+      if (r === "ok") { setRow(i, "st-ok", "patvirtinta", attempt, performance.now() - t0); return "ok"; }
+      if (r === "blind") { setRow(i, "st-blind", "išsiųsta be patvirtinimo", attempt, performance.now() - t0); return "blind"; }
+      setRow(i, "st-wait", "Google užimtas, bandoma vėl…", attempt);
+      await sleep(1500 * attempt + Math.random() * 1500);
+    }
+    setRow(i, "st-bad", "nepavyko", 6, performance.now() - t0);
+    return "fail";
+  }
+
+  $("go").addEventListener("click", async () => {
+    $("go").disabled = true;
+    $("summary").textContent = "Siunčiama…";
+    $("verify").textContent = "";
+    const t0 = performance.now();
+    const out = await Promise.all(STUDENTS.map((s, i) => runOne(s, i, $("burst").checked, t0)));
+    const secs = ((performance.now() - t0) / 1000).toFixed(1).replace(".", ",");
+    const ok = out.filter(x => x === "ok").length, blind = out.filter(x => x === "blind").length, fail = out.filter(x => x === "fail").length;
+    $("summary").textContent = `Patvirtinta ${ok} iš 20` + (blind ? ` · be patvirtinimo ${blind}` : "") + (fail ? ` · nepavyko ${fail}` : "") + ` · per ${secs} s`;
+    try {
+      const res = await fetch(C.SCRIPT_URL + "?t=" + Date.now());
+      const data = await res.json();
+      // doGet doesn't return ids, so count TEST rows instead
+      const testRows = (data.rows || []).filter(r => r.cls === "TEST").length;
+      $("verify").textContent = `Google lentelėje dabar yra ${testRows} eilučių su klase TEST (turėtų būti 20).`;
+    } catch (e) {
+      $("verify").textContent = "Nepavyko patikrinti lentelės iš šio puslapio.";
+    }
+    $("go").disabled = false;
+    $("go").textContent = "Siųsti dar kartą (dublikatų nebus)";
+  });
+})();
+</script>
+</body>
+</html>
