@@ -48,17 +48,22 @@ function doPost(e) {
   if (team !== 'influence' && team !== 'control') return json_({ ok: false, error: 'bad team' });
   if (!/^[A-D-]{1,100}$/.test(answers)) return json_({ ok: false, error: 'bad answers' });
 
+  // Saves happen one at a time (~0.5-1 s each). Wait up to 30 s for our turn; if Google is
+  // still busy, say so right away so the quiz retries instead of hanging.
   const lock = LockService.getScriptLock();
-  lock.waitLock(15000);
+  if (!lock.tryLock(30000)) return json_({ ok: false, busy: true });
   try {
     const sh = getSheet_();
     const last = sh.getLastRow();
     if (last > 1) {
-      const ids = sh.getRange(2, 2, last - 1, 1).getValues().map(r => String(r[0]));
-      if (ids.indexOf(id) !== -1) return json_({ ok: true, duplicate: true });
+      const found = sh.getRange(2, 2, last - 1, 1).createTextFinder(id).matchEntireCell(true).findNext();
+      if (found) return json_({ ok: true, duplicate: true });
     }
     // Leading apostrophe keeps Sheets from reading values like "8-B" as dates.
     sh.appendRow([new Date(), id, "'" + cls, team, "'" + answers, num(d.matched), num(d.other), num(d.skipped)]);
+    SpreadsheetApp.flush();
+  } catch (err) {
+    return json_({ ok: false, error: String(err) });
   } finally {
     lock.releaseLock();
   }
