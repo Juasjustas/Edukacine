@@ -9,13 +9,13 @@ window.QUIZ_CONFIG = {
   SCRIPT_URL: "https://script.google.com/macros/s/AKfycby84X2v0OhB2De1d2Dmve4FaBswASbKTgnCn8shMQHk31oPWqWclnSTcLC7Jaza2ZPleg/exec",
 
   /* 2. Timing and fake peers */
-  SECONDS_PER_QUESTION: 10,
+  SECONDS_PER_QUESTION: 8,
   // Each question gets a different random number of fake classmates, arriving at random moments.
   PEERS_MIN: 5,            // fewest fake classmates on a question
   PEERS_MAX: 9,            // most fake classmates on a question
-  PEERS_FIRST_MIN: 1.5,    // the first one appears somewhere between these two times (seconds)
-  PEERS_FIRST_MAX: 5,
-  PEERS_LAST_BY: 9,        // all of them have answered by this time (seconds)
+  PEERS_FIRST_MIN: 1.2,    // the first one appears somewhere between these two times (seconds)
+  PEERS_FIRST_MAX: 4,
+  PEERS_LAST_BY: 7.2,      // all of them have answered by this time (seconds); keep below SECONDS_PER_QUESTION
   PEERS_UNANIMOUS: 0.6,    // on questions where they pick the right answer: chance that ALL pick it
   PEERS_MAJORITY_MIN: 0.5, // on trap questions: the share picking the wrong "crowd" answer
   PEERS_MAJORITY_MAX: 0.85,//   is random between these (always more than half)
@@ -26,12 +26,12 @@ window.QUIZ_CONFIG = {
   INTRO_TITLE: "Greitoji viktorina",
   INTRO_CONTROL: [
     "Tavęs laukia 20 klausimų iš biologijos, istorijos, chemijos, fizikos ir kitų dalykų. Kiekvienas klausimas turi 4 atsakymus – pasirink tą, kuris, tavo manymu, yra teisingas.",
-    "Kiekvienam klausimui turi 10 sekundžių. Kol laikas nesibaigė, atsakymą gali pakeisti. Jei nežinai atsakymo, gali klausimą praleisti.",
+    "Kiekvienam klausimui turi 8 sekundes. Kol laikas nesibaigė, atsakymą gali pakeisti. Jei nežinai atsakymo, gali klausimą praleisti.",
     "Klausimai pamažu sunkėja, todėl nesijaudink, jei į kai kuriuos neatsakysi. Atsakinėk savarankiškai ir nesitark su kitais."
   ],
   INTRO_INFLUENCE: [
     "Tavęs laukia 20 klausimų iš biologijos, istorijos, chemijos, fizikos ir kitų dalykų. Kiekvienas klausimas turi 4 atsakymus – pasirink tą, kuris, tavo manymu, yra teisingas.",
-    "Kiekvienam klausimui turi 10 sekundžių. Kol laikas nesibaigė, atsakymą gali pakeisti. Jei nežinai atsakymo, gali klausimą praleisti. Šalia atsakymų matysi ir kitų mokinių pasirinkimus.",
+    "Kiekvienam klausimui turi 8 sekundes. Kol laikas nesibaigė, atsakymą gali pakeisti. Jei nežinai atsakymo, gali klausimą praleisti. Šalia atsakymų matysi ir kitų mokinių pasirinkimus.",
     "Klausimai pamažu sunkėja, todėl nesijaudink, jei į kai kuriuos neatsakysi. Atsakinėk savarankiškai ir nesitark su kitais."
   ],
 
