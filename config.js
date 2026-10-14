@@ -28,12 +28,12 @@ window.QUIZ_CONFIG = {
   INTRO_TITLE: "Greitoji viktorina",
   INTRO_CONTROL: [
     "Tavęs laukia 20 klausimų iš biologijos, istorijos, chemijos, fizikos ir kitų dalykų. Kiekvienas klausimas turi 4 atsakymus – pasirink tą, kuris, tavo manymu, yra teisingas.",
-    "Kiekvienam klausimui turi 8 sekundes. Kol laikas nesibaigė, atsakymą gali pakeisti. Jei nežinai atsakymo, gali klausimą praleisti.",
+    "Kiekvienam klausimui turi 8 sekundes. Kol laikas nesibaigė, atsakymą gali pakeisti.",
     "Klausimai pamažu sunkėja, todėl nesijaudink, jei į kai kuriuos neatsakysi. Atsakinėk savarankiškai ir nesitark su kitais."
   ],
   INTRO_INFLUENCE: [
     "Tavęs laukia 20 klausimų iš biologijos, istorijos, chemijos, fizikos ir kitų dalykų. Kiekvienas klausimas turi 4 atsakymus – pasirink tą, kuris, tavo manymu, yra teisingas.",
-    "Kiekvienam klausimui turi 8 sekundes. Kol laikas nesibaigė, atsakymą gali pakeisti. Jei nežinai atsakymo, gali klausimą praleisti. Šalia atsakymų matysi ir kitų mokinių pasirinkimus.",
+    "Kiekvienam klausimui turi 8 sekundes. Kol laikas nesibaigė, atsakymą gali pakeisti. Šalia atsakymų matysi ir kitų mokinių pasirinkimus.",
     "Klausimai pamažu sunkėja, todėl nesijaudink, jei į kai kuriuos neatsakysi. Atsakinėk savarankiškai ir nesitark su kitais."
   ],
 

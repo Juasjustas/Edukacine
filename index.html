@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&display=swap">
-<link rel="stylesheet" href="style.css?v=20261013e">
+<link rel="stylesheet" href="style.css?v=20261014a">
 </head>
 <body>
 <main class="wrap">
@@ -31,7 +31,6 @@
     <div class="opts" id="opts"></div>
     <div class="quizfoot">
       <p class="hint" id="hint"></p>
-      <button class="btn ghost sm" id="skipBtn" type="button">Praleisti klausimą →</button>
     </div>
   </section>
 
@@ -46,7 +45,7 @@
   </section>
 </main>
 
-<script src="config.js?v=20261013e"></script>
+<script src="config.js?v=20261014a"></script>
 <script>
 (function () {
   const C = window.QUIZ_CONFIG;
@@ -294,7 +293,6 @@
   }
 
   $("retryBtn").addEventListener("click", () => lastResult && sendWithRetry(lastResult, false));
-  $("skipBtn").addEventListener("click", () => { choice = null; next(); });
   $("startBtn").addEventListener("click", () => { show("quiz"); qi = 0; answers = []; render(); });
 })();
 </script>
